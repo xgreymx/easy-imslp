@@ -1,3 +1,4 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/xgreymx/easy-imslp)
 # easy-imslp
 
 A modern, type-safe TypeScript library for interacting with the [IMSLP](https://imslp.org) (International Music Score Library Project) API.
