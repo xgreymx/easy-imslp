@@ -1,0 +1,70 @@
+{
+  "name": "easy-imslp",
+  "version": "0.1.0",
+  "description": "A modern, type-safe TypeScript library for interacting with the IMSLP API",
+  "author": "xgreymx",
+  "license": "MIT",
+  "homepage": "https://github.com/xgreymx/easy-imslp#readme",
+  "bugs": {
+    "url": "https://github.com/xgreymx/easy-imslp/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "rimraf": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "imslp",
+    "music",
+    "sheet-music",
+    "classical-music",
+    "api",
+    "typescript",
+    "petrucci",
+    "scores",
+    "composer",
+    "piano",
+    "violin",
+    "orchestra",
+    "public-domain",
+    "mediawiki"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xgreymx/easy-imslp.git"
+  }
+}
