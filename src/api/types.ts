@@ -39,6 +39,11 @@ export interface MWSearchResponse {
     sroffset: number;
     continue: string;
   };
+  'query-continue'?: {
+    search: {
+      sroffset: number;
+    };
+  };
   query: {
     searchinfo?: {
       totalhits: number;

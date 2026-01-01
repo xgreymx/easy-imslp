@@ -51,9 +51,19 @@ export function parseComposerWikitext(
   const params = template?.params ?? {};
 
   // Parse name parts
-  const firstName = params['first_name'] ?? params['firstname'] ?? '';
-  const lastName = params['last_name'] ?? params['lastname'] ?? '';
+  let firstName = params['first_name'] ?? params['firstname'] ?? '';
+  let lastName = params['last_name'] ?? params['lastname'] ?? '';
   const fullName = params['full_name'] ?? params['fullname'] ?? '';
+
+  // If template doesn't have name parts, extract from slug
+  // Slug format is "LastName, FirstName" or just "Name"
+  if (!firstName && !lastName) {
+    const slugParts = slug.replace(/_/g, ' ').split(',').map(s => s.trim());
+    if (slugParts.length >= 2) {
+      lastName = slugParts[0];
+      firstName = slugParts.slice(1).join(' ');
+    }
+  }
 
   // Build names
   let name = fullName;
@@ -151,9 +161,10 @@ export function parseWorkWikitext(
   const movements = parseMovements(wikitext, warnings);
 
   // Build composer reference
-  const composerName = params['composer'] ?? formatSlugAsName(composerSlug ?? '');
+  const extractedComposerSlug = composerSlug ?? extractComposerFromSlug(slug) ?? '';
+  const composerName = params['composer'] ?? formatSlugAsName(extractedComposerSlug);
   const composer: ComposerReference = {
-    slug: composerSlug ?? extractComposerFromSlug(slug) ?? '',
+    slug: extractedComposerSlug,
     name: composerName,
   };
 

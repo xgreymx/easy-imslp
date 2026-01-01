@@ -41,18 +41,33 @@ export class SearchService {
     const opts = this.normalizeOptions(options);
     const allWarnings: string[] = [];
 
+    // Include composer in search query for better results
+    let searchQuery = query;
+    if (opts.composer) {
+      searchQuery = `${query} ${opts.composer}`;
+    }
+
+    // Fetch more than requested to account for filtering
+    // Use higher multiplier when filters are applied
+    const fetchMultiplier = (opts.instrument || opts.composer) ? 5 : 2;
+    const fetchLimit = opts.limit * fetchMultiplier;
+
     // Search works
-    const searchResult = await this.api.searchWorks(query, {
-      limit: opts.limit,
+    const searchResult = await this.api.searchWorks(searchQuery, {
+      limit: fetchLimit,
     });
 
     const works: Work[] = [];
 
     // Parse each result
     for (const result of searchResult.results) {
+      // Stop if we've reached the desired limit
+      if (works.length >= opts.limit) break;
+
       try {
         const wikitext = await this.api.getPageWikitext(result.title);
-        const parsed = parseWorkWikitext(wikitext, result.title, opts.composer);
+        // Don't pass composer filter to parse - let it extract from the work data
+        const parsed = parseWorkWikitext(wikitext, result.title);
 
         // Apply filters
         if (this.matchesFilters(parsed.data, opts)) {
@@ -64,11 +79,21 @@ export class SearchService {
       }
     }
 
+    // hasMore is true if:
+    // 1. The API has more results, OR
+    // 2. We got more filtered results than the requested limit
+    const hasMore = searchResult.hasMore || works.length > opts.limit;
+
+    // Trim to exact limit if we got more
+    const items = works.slice(0, opts.limit);
+
     return {
       data: {
-        items: works,
-        total: searchResult.total,
-        hasMore: searchResult.hasMore,
+        items,
+        // Total is the number of filtered items we got, not the API total
+        // Since we only fetch 2x limit, we can't know the real total with filters
+        total: items.length,
+        hasMore,
       },
       warnings: allWarnings,
     };
@@ -80,13 +105,19 @@ export class SearchService {
   async searchComposers(query: string, limit: number = 10): Promise<ParseResult<SearchResult<Composer>>> {
     const allWarnings: string[] = [];
 
+    // Request 2x the limit to account for filtering
+    const fetchLimit = limit * 2;
+
     // Search in Category namespace for composers
-    const searchResult = await this.api.searchCategories(query, { limit });
+    const searchResult = await this.api.searchCategories(query, { limit: fetchLimit });
 
     const composers: Composer[] = [];
 
     // Parse each result
     for (const result of searchResult.results) {
+      // Stop if we've reached the desired limit
+      if (composers.length >= limit) break;
+
       // Only process composer categories
       if (!result.title.startsWith('Category:')) continue;
 
@@ -102,11 +133,17 @@ export class SearchService {
       }
     }
 
+    // hasMore is true if API has more results OR we got more than requested
+    const hasMore = searchResult.hasMore || composers.length > limit;
+
+    // Trim to exact limit
+    const items = composers.slice(0, limit);
+
     return {
       data: {
-        items: composers,
+        items,
         total: searchResult.total,
-        hasMore: searchResult.hasMore,
+        hasMore,
       },
       warnings: allWarnings,
     };

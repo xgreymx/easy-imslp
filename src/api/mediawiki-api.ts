@@ -118,7 +118,8 @@ export class MediaWikiApi {
     const data = response.data;
     const results = data.query?.search ?? [];
     const total = data.query?.searchinfo?.totalhits ?? results.length;
-    const hasMore = data.continue !== undefined;
+    // Check both 'continue' and 'query-continue' for backwards compatibility
+    const hasMore = data.continue !== undefined || data['query-continue'] !== undefined;
 
     return { results, total, hasMore };
   }
